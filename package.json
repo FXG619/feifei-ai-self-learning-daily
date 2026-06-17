@@ -6,13 +6,16 @@
   "scripts": {
     "dev": "astro dev --host 127.0.0.1",
     "build": "astro build",
-    "validate:content": "astro check"
+    "generate:draft": "node --experimental-strip-types scripts/generate-draft.ts",
+    "validate:content": "node --experimental-strip-types scripts/validate-content.ts && astro check"
   },
   "dependencies": {
-    "astro": "^5.13.0"
+    "astro": "^5.13.0",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "@types/node": "^22.10.0",
     "typescript": "^5.6.3"
   }
 }

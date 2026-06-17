@@ -84,3 +84,42 @@ src/data/
 ## 当前状态
 
 当前还没有 AI 生成脚本。下一步会加入生成 draft 的本地流程，但不会自动发布内容。
+
+## 生成草稿
+
+运行：
+
+```bash
+npm run generate:draft
+```
+
+脚本会从 `src/data/startup-plan.yaml` 或 `src/data/actions.yaml` 中选择一个主题或动作，读取 `prompts/editorial_rules.md` 和 `prompts/style_guide.md`，在 `src/content/daily/` 生成一篇新的 Markdown 日报草稿。
+
+没有 `OPENAI_API_KEY` 时，脚本会使用本地 fallback 模板生成可读草稿，不会失败。有 `OPENAI_API_KEY` 时，后续才会接入可选 LLM 逻辑；当前版本不会强制依赖，也不会自动调用外部 API。
+
+所有生成内容永远默认：
+
+```yaml
+status: "draft"
+```
+
+飞飞审核后，才可以手动把 `status` 改为 `published`。
+
+## 校验内容
+
+运行：
+
+```bash
+npm run validate:content
+```
+
+校验会检查日报 frontmatter、固定正文标题、AI 提示词、家长问题、风险提醒、动作库字段，以及首页、`/daily`、`/rss.xml` 是否使用只读取 `published` 的数据逻辑。
+
+生成新 draft 后，可以用下面方式确认它没有公开展示：
+
+```bash
+npm run build
+rg "新草稿标题" dist/index.html dist/daily/index.html dist/rss.xml
+```
+
+如果没有匹配结果，说明新 draft 没有出现在首页、`/daily` 和 RSS 中。
