@@ -1,0 +1,64 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { formatDate, getPublishedDaily } from "../../lib/daily";
+
+export async function getStaticPaths() {
+  const entries = await getPublishedDaily();
+  return entries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<BaseLayout title={`${entry.data.title} - 飞飞的 AI 自学力日报`} description={entry.data.summary}>
+  <main class="page-shell article-shell">
+    <article class="daily-card">
+      <div class="daily-meta">
+        <span>{formatDate(entry.data.date)}</span>
+        <span>第 {entry.data.day_number} 天</span>
+        <span>{entry.data.category}</span>
+      </div>
+
+      <section class="one-thing">
+        <p>今天只做一件事</p>
+        <h1>{entry.data.title}</h1>
+        <p>{entry.data.summary}</p>
+      </section>
+
+      <div class="article-content">
+        <Content />
+      </div>
+
+      <section class="prompt-copy-card" aria-label="复制 AI 提示词">
+        <h2>今日 AI 陪练提示词</h2>
+        <p>把这段复制给 AI，让它先追问孩子，再陪孩子完成练习。</p>
+        <button type="button" data-copy-prompt>复制 AI 提示词</button>
+      </section>
+
+      <section class="bottom-cta">
+        想知道你家孩子本周最该练什么？后续会开放「中考英语 AI 自学雷达」。
+      </section>
+    </article>
+  </main>
+
+  <script>
+    const button = document.querySelector("[data-copy-prompt]");
+    const heading = Array.from(document.querySelectorAll(".article-content h2")).find(
+      (node) => node.textContent?.trim() === "今日 AI 陪练提示词",
+    );
+    const promptText = heading?.nextElementSibling?.textContent?.trim() ?? "";
+
+    button?.addEventListener("click", async () => {
+      if (!promptText) return;
+      await navigator.clipboard.writeText(promptText);
+      button.textContent = "已复制";
+      window.setTimeout(() => {
+        button.textContent = "复制 AI 提示词";
+      }, 1800);
+    });
+  </script>
+</BaseLayout>

@@ -1,0 +1,39 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { formatDate, getPublishedDaily, getPublishedTags } from "../../lib/daily";
+
+export async function getStaticPaths() {
+  const tags = await getPublishedTags();
+  return tags.map((tag) => ({
+    params: { tag },
+    props: { tag },
+  }));
+}
+
+const { tag } = Astro.props;
+const entries = (await getPublishedDaily()).filter((entry) => entry.data.tags.includes(tag));
+---
+
+<BaseLayout title={`${tag} - 飞飞的 AI 自学力日报`}>
+  <main class="page-shell">
+    <section class="section-heading">
+      <p class="eyebrow">Tag</p>
+      <h1>{tag}</h1>
+      <p>同一主题下的已发布日报。</p>
+    </section>
+
+    <div class="archive-list">
+      {
+        entries.map((entry) => (
+          <article class="archive-item">
+            <p class="archive-date">{formatDate(entry.data.date)}</p>
+            <h2>
+              <a href={`/daily/${entry.slug}`}>{entry.data.title}</a>
+            </h2>
+            <p>{entry.data.summary}</p>
+          </article>
+        ))
+      }
+    </div>
+  </main>
+</BaseLayout>

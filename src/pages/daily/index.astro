@@ -1,0 +1,36 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { formatDate, getPublishedDaily } from "../../lib/daily";
+
+const entries = await getPublishedDaily();
+---
+
+<BaseLayout title="往期日报 - 飞飞的 AI 自学力日报">
+  <main class="page-shell">
+    <section class="section-heading">
+      <p class="eyebrow">Archive</p>
+      <h1>往期日报</h1>
+      <p>这里只展示已经人工确认发布的日报，草稿不会出现在归档里。</p>
+    </section>
+
+    <div class="archive-list">
+      {
+        entries.map((entry) => (
+          <article class="archive-item">
+            <p class="archive-date">{formatDate(entry.data.date)}</p>
+            <h2>
+              <a href={`/daily/${entry.slug}`}>{entry.data.title}</a>
+            </h2>
+            <p>{entry.data.summary}</p>
+            <div class="tag-row">
+              <span>{entry.data.category}</span>
+              {entry.data.tags.map((tag) => (
+                <a href={`/tags/${encodeURIComponent(tag)}`}>{tag}</a>
+              ))}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </main>
+</BaseLayout>

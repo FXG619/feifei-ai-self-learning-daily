@@ -1,0 +1,33 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "飞飞的 AI 自学力日报",
+  description = "每天 3 分钟，学会用 AI 真正把英语学进去。",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">飞飞的 AI 自学力日报</a>
+      <nav aria-label="主导航">
+        <a href="/daily">往期日报</a>
+        <a href="/about">关于项目</a>
+      </nav>
+    </header>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { formatDate, getLatestPublishedDaily } from "../lib/daily";
+
+const latest = await getLatestPublishedDaily();
+
+if (!latest) {
+  throw new Error("No published daily entry found. Add at least one published markdown file.");
+}
+
+const { Content } = await latest.render();
+---
+
+<BaseLayout>
+  <main class="page-shell">
+    <section class="hero-card">
+      <p class="eyebrow">每天 3 分钟</p>
+      <h1>飞飞的 AI 自学力日报</h1>
+      <p class="subtitle">每天 3 分钟，学会用 AI 真正把英语学进去。</p>
+      <p class="principle">不是让 AI 替孩子学习，而是让孩子借助 AI 学会自学。</p>
+    </section>
+
+    <article class="daily-card">
+      <div class="daily-meta">
+        <span>{formatDate(latest.data.date)}</span>
+        <span>{latest.data.category}</span>
+        <span>{latest.data.focus}</span>
+      </div>
+
+      <section class="one-thing">
+        <p>今天只做一件事</p>
+        <h2>{latest.data.title}</h2>
+        <p>{latest.data.summary}</p>
+      </section>
+
+      <div class="article-content home-content">
+        <Content />
+      </div>
+    </article>
+
+    <section class="link-grid" aria-label="更多入口">
+      <a href="/daily">
+        <span>往期日报</span>
+        <strong>查看所有已发布学习卡</strong>
+      </a>
+      <a href="/about">
+        <span>关于项目</span>
+        <strong>了解为什么做 AI 自学力日报</strong>
+      </a>
+    </section>
+  </main>
+</BaseLayout>
