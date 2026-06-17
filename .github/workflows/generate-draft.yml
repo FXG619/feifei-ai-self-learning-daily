@@ -1,0 +1,81 @@
+name: Generate Daily Draft
+
+on:
+  workflow_dispatch:
+  schedule:
+    # UTC 23:30 = 北京/新加坡时间次日 07:30
+    - cron: "30 23 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate-draft:
+    runs-on: ubuntu-latest
+
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate draft
+        run: npm run generate:draft
+
+      - name: Validate content
+        run: npm run validate:content
+
+      - name: Build site
+        run: npm run build
+
+      - name: Prepare PR metadata
+        run: |
+          echo "DRAFT_DATE=$(date -u +'%Y-%m-%d')" >> "$GITHUB_ENV"
+
+      - name: Create pull request for draft
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: draft/daily-${{ github.run_id }}
+          title: draft: AI 自学力日报 ${{ env.DRAFT_DATE }}
+          commit-message: "draft: generate AI self-learning daily ${{ env.DRAFT_DATE }}"
+          body: |
+            ## 自动生成的 draft
+
+            本 PR 是 GitHub Actions 自动生成的「飞飞的 AI 自学力日报」草稿。
+
+            ### 请飞飞人工审核
+
+            - 本 PR 默认只生成 `draft`，不会公开展示。
+            - 请根据 `docs/REVIEW_CHECKLIST.md` 人工审核内容。
+            - 确认后，手动把对应日报文件的 `status: "draft"` 改为 `status: "published"`。
+            - 修改后请确认：
+              - `npm run validate:content` 通过
+              - `npm run build` 通过
+            - 审核通过后再合并 PR。
+
+            ### 不要自动发布的内容
+
+            以下类型必须人工重点审核，不能直接发布：
+
+            - 政策
+            - 考试
+            - 升学
+            - 心理判断
+            - 工具推荐
+            - 任何可能制造焦虑或承诺提分的内容
+
+            ### 发布原则
+
+            不是让 AI 替孩子学习，而是让孩子借助 AI 学会自学。
+          delete-branch: true
